@@ -2,15 +2,15 @@ join_key: id
 input:
   table:
     - name: ./input.csv
-      columns:
-        - id
-        - name
-        - price 
+    #  columns:
+    #    - id
+    #    - name
+    #    - price
     - name: ./input2.csv
-      columns:
-        - id
-        - kind 
-        - taste_score
+    #  columns:
+    #    - id
+    #    - kind
+    #    - taste_score
 output:
   table:
     - name: ./output.csv

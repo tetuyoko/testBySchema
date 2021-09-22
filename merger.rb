@@ -1,20 +1,34 @@
 require 'csv'
 require 'hashie'
 
-def main
-  yaml = Hashie::Mash.load("./config.yaml")
-  key = yaml.join_key
-  input_file = yaml.input.table[0].name
-  input2_file = yaml.input.table[1].name
-  output_file = yaml.output.table[0].name
-
+def main(yaml)
   array = []
-  array = calc_merge(key, input_file, input2_file)
 
-  File.write(output_file, CSV::Table.new(array))
+  # merge
+  array = calc_merge(
+    key: yaml.join_key,
+    input_file: yaml.input.table[0].name,
+    input2_file: yaml.input.table[1].name
+  )
+
+  # extract
+  array = extract_array(
+    source: array,
+    columns: yaml.output.table[0].columns.to_a
+  )
+
+  # output
+  File.write(yaml.output.table[0].name, CSV::Table.new(array))
 end
 
-def calc_merge(key, input_file, input2_file)
+def extract_array(source:, columns:)
+  source.each do |r|
+    r.delete_if { |header, _| !columns.include?(header) }
+  end
+  return source
+end
+
+def calc_merge(key:, input_file:, input2_file:)
   key_index = CSV.read(input_file)[0].index(key)
   key_index2 =CSV.read(input2_file)[0].index(key)
   array = []
@@ -25,9 +39,9 @@ def calc_merge(key, input_file, input2_file)
         row << row2.to_h
         array << row
       end
-    end 
-  end 
+    end
+  end
   return array
 end
 
-main
+main Hashie::Mash.load("./config.yaml")
